@@ -1,19 +1,13 @@
-import express from "express";
-import cors from "cors";
-import jwt from "jsonwebtoken";
+const express = require("express");
+const cors = require("cors");
+const jwt = require("jsonwebtoken");
 
 const app = express();
+
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-
-if (!process.env.JWT_SECRET) {
-  throw new Error("JWT_SECRET não definido");
-}
-const JWT_SECRET = process.env.JWT_SECRET;
-
-// rota status
+// rota raiz (teste no navegador)
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
@@ -29,7 +23,9 @@ app.post("/auth/register", (req, res) => {
     return res.status(400).json({ error: "Dados obrigatórios" });
   }
 
-  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+    expiresIn: "7d"
+  });
 
   res.json({
     message: "Usuário criado",
@@ -45,7 +41,9 @@ app.post("/auth/login", (req, res) => {
     return res.status(400).json({ error: "Dados obrigatórios" });
   }
 
-  const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: "7d" });
+  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
+    expiresIn: "7d"
+  });
 
   res.json({
     message: "Login ok",
@@ -64,14 +62,11 @@ app.get("/me", (req, res) => {
   const token = authHeader.split(" ")[1];
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     res.json(decoded);
   } catch {
     res.status(401).json({ error: "Token inválido" });
   }
 });
 
-// start
-app.listen(PORT, () => {
-  console.log(`Servidor rodando na porta ${PORT}`);
-});
+module.exports = app;
