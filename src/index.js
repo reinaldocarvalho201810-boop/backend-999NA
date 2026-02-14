@@ -1,13 +1,20 @@
-const express = require("express");
-const cors = require("cors");
-const jwt = require("jsonwebtoken");
+import express from "express";
+import cors from "cors";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+import { PrismaClient } from "@prisma/client";
+
+dotenv.config();
 
 const app = express();
+const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
 
-// rota raiz (teste no navegador)
+/* =========================
+   ROTA RAIZ (teste navegador)
+   ========================= */
 app.get("/", (req, res) => {
   res.json({
     status: "ok",
@@ -15,58 +22,87 @@ app.get("/", (req, res) => {
   });
 });
 
-// registro
-app.post("/auth/register", (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: "Dados obrigatórios" });
-  }
-
-  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-    expiresIn: "7d"
-  });
-
-  res.json({
-    message: "Usuário criado",
-    token
-  });
-});
-
-// login
-app.post("/auth/login", (req, res) => {
-  const { email, password } = req.body;
-
-  if (!email || !password) {
-    return res.status(400).json({ error: "Dados obrigatórios" });
-  }
-
-  const token = jwt.sign({ email }, process.env.JWT_SECRET, {
-    expiresIn: "7d"
-  });
-
-  res.json({
-    message: "Login ok",
-    token
-  });
-});
-
-// rota protegida
-app.get("/me", (req, res) => {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ error: "Token ausente" });
-  }
-
-  const token = authHeader.split(" ")[1];
-
+/* =========================
+   REGISTRO
+   ========================= */
+app.post("/auth/register", async (req, res) => {
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    res.json(decoded);
-  } catch {
-    res.status(401).json({ error: "Token inválido" });
+    const { email, password } = req.body;
+
+    if (!email || !password) {
+      return res.status(400).json({ error: "Dados obrigatórios" });
+    }
+
+    const userExists = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (userExists) {
+      return res.status(400).json({ error: "Usuário já existe" });
+    }
+
+    const user = await prisma.user.create({
+      data: {
+        email,
+        password,
+        balance: 0
+      }
+    });
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Usuário criado",
+      token
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro interno" });
   }
 });
 
-module.exports = app;
+/* =========================
+   LOGIN
+   ========================= */
+app.post("/auth/login", async (req, res) => {
+  try {
+    const { email, password } = req.body;
+
+    const user = await prisma.user.findUnique({
+      where: { email }
+    });
+
+    if (!user || user.password !== password) {
+      return res.status(400).json({ error: "Credenciais inválidas" });
+    }
+
+    const token = jwt.sign(
+      { id: user.id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: "7d" }
+    );
+
+    res.json({
+      message: "Login realizado",
+      token
+    });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ error: "Erro interno" });
+  }
+});
+
+/* =========================
+   SERVIDOR
+   ========================= */
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, () => {
+  console.log("Server running on port " + PORT);
+});
