@@ -99,6 +99,42 @@ app.post("/auth/login", async (req, res) => {
 });
 
 /* =========================
+   /* ==========================
+   PERFIL DO USUÁRIO (PROTEGIDO)
+========================== */
+
+app.get("/user/profile", async (req, res) => {
+  try {
+
+    const authHeader = req.headers.authorization;
+
+    if (!authHeader) {
+      return res.status(401).json({ error: "Token não enviado" });
+    }
+
+    const token = authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    const user = await prisma.user.findUnique({
+      where: { email: decoded.email },
+      select: {
+        id: true,
+        email: true,
+        balance: true
+      }
+    });
+
+    if (!user) {
+      return res.status(404).json({ error: "Usuário não encontrado" });
+    }
+
+    res.json(user);
+
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido ou expirado" });
+  }
+});
    SERVIDOR
    ========================= */
 const PORT = process.env.PORT || 10000;
