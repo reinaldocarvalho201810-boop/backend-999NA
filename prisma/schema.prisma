@@ -14,7 +14,7 @@ model User {
   balance   Float    @default(0)
   createdAt DateTime @default(now())
   bets      Bet[]
-}
+transactions Transaction[]
 
 model Game {
   id        String   @id @default(uuid())
