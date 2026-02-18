@@ -4,7 +4,9 @@
   "description": "Backend do jogo 999NA",
   "main": "src/index.js",
   "type": "module",
-
+"prisma": {
+  "seed": "node prisma/seed.js"
+},
   "scripts": {
     "build": "npx prisma generate && npx prisma db push",
     "start": "node src/index.js"
