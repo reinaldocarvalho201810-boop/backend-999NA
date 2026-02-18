@@ -6,7 +6,7 @@
   "type": "module",
 
   "scripts": {
-    "build": "npx prisma generate",
+    "build": "npx prisma generate && npx prisma db push",
     "start": "node src/index.js"
   },
 
