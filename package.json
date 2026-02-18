@@ -6,8 +6,8 @@
   "type": "module",
   "scripts": {
     "build": "npx prisma generate",
-    "start": "npx prisma generate && npx prisma migrate deploy && node src/index.js"
-  },
+
+"start": "node src/index.js"  },
   "dependencies": {
     "@prisma/client": "^5.10.2",
     "dotenv": "^16.4.5",
