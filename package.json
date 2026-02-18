@@ -4,10 +4,12 @@
   "description": "Backend do jogo 999NA",
   "main": "src/index.js",
   "type": "module",
+
   "scripts": {
     "build": "npx prisma generate",
-    "start": "npx prisma generate && npx prisma db push && node prisma/seed.js && node src/index.js"
+    "start": "npx prisma generate && npx prisma db push && node src/index.js"
   },
+
   "dependencies": {
     "@prisma/client": "^5.10.2",
     "dotenv": "^16.4.5",
@@ -15,10 +17,8 @@
     "cors": "^2.8.5",
     "jsonwebtoken": "^9.0.2"
   },
+
   "devDependencies": {
     "prisma": "^5.10.2"
-  },
-  "prisma": {
-    "seed": "node prisma/seed.js"
   }
 }
