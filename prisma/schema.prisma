@@ -13,15 +13,18 @@ model User {
   password  String
   balance   Float    @default(0)
   createdAt DateTime @default(now())
-  bets      Bet[]
-transactions Transaction[]
+
+  bets         Bet[]
+  transactions Transaction[] @relation("UserTransactions")
+}
 
 model Game {
-  id        String   @id @default(uuid())
-  name      String
-  provider  String
-  rtp       Float
-  bets      Bet[]
+  id       String @id @default(uuid())
+  name     String
+  provider String
+  rtp      Float
+
+  bets Bet[]
 }
 
 model Bet {
@@ -44,5 +47,5 @@ model Transaction {
   createdAt DateTime @default(now())
 
   userId String
-  user   User @relation(fields: [userId], references: [id])
+  user   User @relation("UserTransactions", fields: [userId], references: [id])
 }
