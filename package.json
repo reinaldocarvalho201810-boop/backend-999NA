@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "description": "Backend do jogo 999NA",
   "main": "src/index.js",
-  "type": "module",
+  
 
   "scripts": {
     "build": "npx prisma generate",
