@@ -5,14 +5,13 @@ const prisma = new PrismaClient();
 
 async function main() {
 
-  // cria usuário de teste
   await prisma.user.upsert({
-    where: { email: "teste@999na.com" },
+    where: { email: "admin@999na.com" },
     update: {},
     create: {
-      email: "teste@999na.com",
+      email: "admin@999na.com",
       password: "12345678",
-      balance: 1000
+      balance: 10000
     }
   });
 
@@ -20,9 +19,7 @@ async function main() {
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
+  .then(() => prisma.$disconnect())
   .catch(async (e) => {
     console.error(e);
     await prisma.$disconnect();
