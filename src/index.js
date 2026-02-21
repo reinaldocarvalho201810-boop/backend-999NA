@@ -3,7 +3,7 @@ import cors from "cors";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 import { PrismaClient } from "@prisma/client";
-
+import walletRoutes from "./routes/wallet.routes.js";
 dotenv.config();
 
 const app = express();
@@ -11,7 +11,7 @@ const prisma = new PrismaClient();
 
 app.use(cors());
 app.use(express.json());
-
+app.use("/wallet", walletRoutes);
 /* =========================
    ROTA RAIZ (teste navegador)
    ========================= */
