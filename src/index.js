@@ -138,33 +138,8 @@ app.get("/user/profile", async (req, res) => {
    
 
 
-const PORT = process.env.PORT || 10000;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("Server running on port " + PORT);
-});
-import jwt from "jsonwebtoken";
-import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
-
-// middleware de autenticação
-function authMiddleware(req, res, next) {
-  const authHeader = req.headers.authorization;
-
-  if (!authHeader)
-    return res.status(401).json({ error: "Token não enviado" });
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.userId = decoded.id;
-    next();
-  } catch {
-    return res.status(401).json({ error: "Token inválido" });
-  }
-}
 
 // rota do usuário logado
 app.get("/user/me", authMiddleware, async (req, res) => {
@@ -186,4 +161,9 @@ app.get("/user/me", authMiddleware, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: "Erro interno" });
   }
+});
+const PORT = process.env.PORT || 10000;
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("Server running on port " + PORT);
 });
