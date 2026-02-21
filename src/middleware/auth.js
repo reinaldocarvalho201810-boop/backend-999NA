@@ -1,12 +1,11 @@
-import jwt from "jsonwebtoken";
+const jwt = require("jsonwebtoken");
 
-export default function authMiddleware(req, res, next) {
+function authMiddleware(req, res, next) {
   try {
-    // pegar header Authorization
     const authHeader = req.headers.authorization;
 
     if (!authHeader) {
-      return res.status(401).json({ error: "Token não fornecido" });
+      return res.status(401).json({ error: "Token não enviado" });
     }
 
     // formato: Bearer TOKEN
@@ -16,14 +15,14 @@ export default function authMiddleware(req, res, next) {
       return res.status(401).json({ error: "Token inválido" });
     }
 
-    // verificar token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-    // salvar usuário dentro da requisição
     req.user = decoded;
 
-    return next();
+    next();
   } catch (err) {
     return res.status(401).json({ error: "Token inválido ou expirado" });
   }
 }
+
+module.exports = authMiddleware;
