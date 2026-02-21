@@ -142,6 +142,23 @@ app.get("/user/profile", async (req, res) => {
 
 
 // rota do usuário logado
+function authMiddleware(req, res, next) {
+  const authHeader = req.headers.authorization;
+
+  if (!authHeader) {
+    return res.status(401).json({ error: "Token não enviado" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.userId = decoded.id;
+    next();
+  } catch (err) {
+    return res.status(401).json({ error: "Token inválido" });
+  }
+}
 app.get("/user/me", authMiddleware, async (req, res) => {
   try {
     const user = await prisma.user.findUnique({
