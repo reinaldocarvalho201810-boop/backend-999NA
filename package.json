@@ -8,9 +8,10 @@
   "seed": "node prisma/seed.js"
 },
   "scripts": {
-    "build": "npx prisma generate",
-    "start": "node src/index.js"
-  },
+  "build": "prisma generate",
+  "start": "node src/index.js",
+  
+},
 
   "dependencies": {
     "@prisma/client": "^5.10.2",
