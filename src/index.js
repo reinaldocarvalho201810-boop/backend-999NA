@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
+import bcrypt from "bcrypt";
 import { PrismaClient } from "@prisma/client";
 import walletRoutes from "./routes/wallet.routes.js";
 dotenv.config();
@@ -56,11 +57,11 @@ app.post("/auth/register", async (req, res) => {
     if (userExists) {
       return res.status(400).json({ error: "Usuário já existe" });
     }
-
+const hashedPassword = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({
       data: {
         email,
-        password,
+        password: hashedPassword,
         balance: 0
       }
     });
@@ -88,14 +89,19 @@ app.post("/auth/register", async (req, res) => {
 app.post("/auth/login", async (req, res) => {
   try {
     const { email, password } = req.body;
+const user = await prisma.user.findUnique({
+  where: { email }
+});
+    if (!user) {
+  return res.status(400).json({ error: "Credenciais inválidas" });
+}
 
-    const user = await prisma.user.findUnique({
-      where: { email }
-    });
+const validPassword = await bcrypt.compare(password, user.password);
 
-    if (!user || user.password !== password) {
-      return res.status(400).json({ error: "Credenciais inválidas" });
-    }
+if (!validPassword) {
+  return res.status(400).json({ error: "Credenciais inválidas" });
+}
+    
 
     const token = jwt.sign(
       { id: user.id, email: user.email },
@@ -110,35 +116,10 @@ app.post("/auth/login", async (req, res) => {
 
   } catch (err) {
     console.error(err);
-    res.status(500).json({ error: "Erro interno" });
-  }
-});
+    
 
-/* =========================
-   
-   PERFIL DO USUÁRIO (PROTEGIDO)
-========================== */
-
-
+    
   
-
-app.get("/user/me", authMiddleware, async (req, res) => {
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: req.userId },
-      select: {
-        id: true,
-        email: true,
-        balance: true,
-        createdAt: true
-      }
-    });
-
-    if (!user)
-      return res.status(404).json({ error: "Usuário não encontrado" });
-
-    res.json(user);
-  } catch (err) {
     res.status(500).json({ error: "Erro interno" });
   }
 });
