@@ -2,7 +2,7 @@ import express from "express";
 import cors from "cors";
 import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";
 import { PrismaClient } from "@prisma/client";
 import walletRoutes from "./routes/wallet.routes.js";
 dotenv.config();
