@@ -35,5 +35,74 @@ router.get("/balance", auth, async (req, res) => {
 
   res.json({ balance: user.balance });
 });
+/* =========================
+   DEPOSIT
+========================= */
 
+router.post("/deposit", auth, async (req, res) => {
+  const { amount } = req.body;
+
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: "Valor inválido" });
+  }
+
+  const user = await prisma.user.update({
+    where: { id: req.user.id },
+    data: {
+      balance: {
+        increment: amount
+      }
+    }
+  });
+
+  await prisma.transaction.create({
+    data: {
+      type: "deposit",
+      amount: amount,
+      userId: req.user.id
+    }
+  });
+
+  res.json({
+    message: "Depósito realizado",
+    balance: user.balance
+  });
+});
+/* =========================
+   WITHDRAW
+========================= */
+
+router.post("/withdraw", auth, async (req, res) => {
+  const { amount } = req.body;
+
+  const user = await prisma.user.findUnique({
+    where: { id: req.user.id }
+  });
+
+  if (user.balance < amount) {
+    return res.status(400).json({ error: "Saldo insuficiente" });
+  }
+
+  const updatedUser = await prisma.user.update({
+    where: { id: req.user.id },
+    data: {
+      balance: {
+        decrement: amount
+      }
+    }
+  });
+
+  await prisma.transaction.create({
+    data: {
+      type: "withdraw",
+      amount: amount,
+      userId: req.user.id
+    }
+  });
+
+  res.json({
+    message: "Saque realizado",
+    balance: updatedUser.balance
+  });
+});
 export default router;
